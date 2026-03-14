@@ -1,5 +1,9 @@
+import 'dart:math' as math;
+
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/news_model.dart';
@@ -12,12 +16,16 @@ class ShopContact {
   final String phone;
   final String email;
   final String website;
+  final double latitude;
+  final double longitude;
 
   const ShopContact({
     required this.name,
     required this.phone,
     required this.email,
     required this.website,
+    required this.latitude,
+    required this.longitude,
   });
 }
 
@@ -27,28 +35,36 @@ class MainController extends GetxController {
 
   static const List<ShopContact> shopContacts = [
     ShopContact(
-      name: 'Waikiki',
+      name: 'Hala Tree Cafe Waikiki',
       phone: 'tel:+1234567890',
       email: 'mailto:waikiki@halatree.com',
       website: 'https://halatree.com/waikiki',
+      latitude: 21.278432,
+      longitude: -157.824195,
     ),
     ShopContact(
-      name: 'Kaaawa',
+      name: 'Hala Tree Cafe Kaaawa',
       phone: 'tel:+1234567891',
       email: 'mailto:kaaawa@halatree.com',
       website: 'https://halatree.com/kaaawa',
+      latitude: 21.559102,
+      longitude: -157.862947,
     ),
     ShopContact(
-      name: 'Captain Cook',
+      name: 'Hala Tree Cafe Captain Cook',
       phone: 'tel:+1234567892',
       email: 'mailto:captaincook@halatree.com',
       website: 'https://halatree.com/captaincook',
+      latitude: 19.4969,
+      longitude: -155.9211,
     ),
   ];
 
   final selectedShopIndex = 0.obs;
   final newsHtml = ''.obs;
   final newsLoading = false.obs;
+  /// True while fetching user location to select nearest shop.
+  final locationLoading = false.obs;
 
   ShopContact get selectedContact => shopContacts[selectedShopIndex.value];
 
@@ -61,6 +77,72 @@ class MainController extends GetxController {
 
   void initData() async {
     getNewsData();
+    ensureLocationAndSelectNearestShop();
+  }
+
+  /// Check/request location permission, get user position, and select nearest shop.
+  /// If permission denied or location fails, defaults to first shop (index 0).
+  Future<void> ensureLocationAndSelectNearestShop() async {
+    final status = await Permission.locationWhenInUse.status;
+    if (!status.isGranted) {
+      if (status.isDenied) {
+        final result = await Permission.locationWhenInUse.request();
+        if (!result.isGranted) {
+          selectShop(0);
+          return;
+        }
+      } else {
+        selectShop(0);
+        return;
+      }
+    }
+
+    locationLoading.value = true;
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+      print(position.latitude);
+      print(position.longitude);
+      final index = _indexOfNearestShop(position.latitude, position.longitude);
+      selectedShopIndex.value = index;
+    } catch (_) {
+      selectShop(0);
+    } finally {
+      locationLoading.value = false;
+    }
+  }
+
+  int _indexOfNearestShop(double userLat, double userLon) {
+    int nearest = 0;
+    double minDist = double.infinity;
+    for (int i = 0; i < shopContacts.length; i++) {
+      final d = _haversineKm(
+        userLat,
+        userLon,
+        shopContacts[i].latitude,
+        shopContacts[i].longitude,
+      );
+      if (d < minDist) {
+        minDist = d;
+        nearest = i;
+      }
+    }
+    return nearest;
+  }
+
+  static double _haversineKm(double lat1, double lon1, double lat2, double lon2) {
+    const p = math.pi / 180;
+    final a = 0.5 -
+        math.cos((lat2 - lat1) * p) / 2 +
+        math.cos(lat1 * p) *
+            math.cos(lat2 * p) *
+            (1 - math.cos((lon2 - lon1) * p)) /
+            2;
+    return 12742 * math.asin(math.sqrt(a));
   }
 
   void selectShop(int index) {

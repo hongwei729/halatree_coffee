@@ -153,15 +153,32 @@ class _ContactSection extends StatelessWidget {
               color: colorOnBackground,
             ),
           ),
-          const SizedBox(height: 12),
+          Obx(() {
+            if (controller.locationLoading.value) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 8, bottom: 12),
+                child: LinearProgressIndicator(
+                  color: colorPrimary,
+                  backgroundColor: colorOutline.withValues(alpha: 0.3),
+                ),
+              );
+            }
+            return const SizedBox(height: 12);
+          }),
           Obx(() => SegmentedButton<int>(
+                showSelectedIcon: false,
                 segments: [
                   for (int i = 0; i < MainController.shopContacts.length; i++)
                     ButtonSegment<int>(
                       value: i,
-                      label: Text(
-                        MainController.shopContacts[i].name,
-                        style: GoogleFonts.roboto(fontSize: 12),
+                      label: Center(
+                        child: Text(
+                          MainController.shopContacts[i].name,
+                          style: GoogleFonts.roboto(fontSize: 12),
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          maxLines: null,
+                        ),
                       ),
                     ),
                 ],
@@ -170,6 +187,7 @@ class _ContactSection extends StatelessWidget {
                   controller.selectShop(selected.first);
                 },
                 style: ButtonStyle(
+                  alignment: Alignment.center,
                   backgroundColor: WidgetStateProperty.resolveWith((states) {
                     if (states.contains(WidgetState.selected)) return colorPrimary;
                     return colorSurface;
