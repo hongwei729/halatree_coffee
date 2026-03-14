@@ -41,21 +41,27 @@ class MainScreen extends GetView<MainController> {
                   Expanded(
                     child: _ActionButton(
                       label: 'Waikiki',
-                      onPressed: () {},
+                      onPressed: () {
+                        controller.openWaikiki();
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _ActionButton(
                       label: 'Kaaawa',
-                      onPressed: () {},
+                      onPressed: () {
+                        controller.openKaaawa();
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _ActionButton(
                       label: 'Shop Online',
-                      onPressed: () {},
+                      onPressed: () {
+                        controller.openShopOnline();
+                      },
                     ),
                   ),
                 ],

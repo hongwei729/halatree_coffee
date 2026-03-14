@@ -100,4 +100,17 @@ class MainController extends GetxController {
       newsLoading.value = false;
     }
   }
+
+  void openWaikiki() {
+    showToastMessage("Opening soon, under construction");
+  }
+
+  void openKaaawa() {
+    openUrl("https://www.clover.com/online-ordering/hala-tree-cafe-1");
+  }
+
+  void openShopOnline() {
+    openUrl("https://www.halatreecoffee.com");
+  }
+
 }
