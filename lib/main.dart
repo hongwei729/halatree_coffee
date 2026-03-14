@@ -9,6 +9,9 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 void main() async {
+  // Use bundled fonts only (no network fetch). Prevents crash when offline or
+  // when DNS fails (e.g. release APK on emulator with no network).
+  GoogleFonts.config.allowRuntimeFetching = false;
   await GetStorage.init();
   DioUtil(baseUrl);
   runApp(const MyApp());

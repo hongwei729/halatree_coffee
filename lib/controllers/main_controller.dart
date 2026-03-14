@@ -224,7 +224,14 @@ class MainController extends GetxController {
             onWebResourceError: (error) {
               debugPrint('[News] WebView onWebResourceError: isForMainFrame=${error.isForMainFrame}, '
                   'errorCode=${error.errorCode}, description=${error.description}');
-              if (error.isForMainFrame == true) _showNewsUnavailable();
+              // Android often fires ERR_CACHE_MISS (-1) for the main frame even when the page
+              // goes on to load (onPageFinished still fires). Ignore it so content can display.
+              if (error.isForMainFrame != true) return;
+              if (error.errorCode == -1 &&
+                  error.description.toLowerCase().contains('err_cache_miss')) {
+                return;
+              }
+              _showNewsUnavailable();
             },
             onHttpError: (error) {
               final uri = error.response?.uri;
