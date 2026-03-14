@@ -1,12 +1,9 @@
 import 'dart:math' as math;
-
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../models/news_model.dart';
 import '../utils/constants.dart';
 import '../webservice/api.dart';
 import '../webservice/dio_util.dart';
@@ -60,11 +57,11 @@ class MainController extends GetxController {
     ),
     ShopContact(
       name: 'Hala Tree Cafe Captain Cook',
-      phone: 'tel:+1234567892',
+      phone: 'tel:+18082385005',
       email: 'mailto:captaincook@halatree.com',
       website: 'https://halatree.com/captaincook',
-      latitude: 19.4969,
-      longitude: -155.9211,
+      latitude: 19.482207,
+      longitude: -155.898887,
     ),
   ];
 
@@ -99,23 +96,43 @@ class MainController extends GetxController {
           selectShop(0);
           return;
         }
+      } else if (status.isPermanentlyDenied) {
+        // User chose "Don't ask again" – open app settings so they can enable location.
+        await openAppSettings();
+        selectShop(0);
+        return;
       } else {
         selectShop(0);
         return;
       }
     }
 
+    // Permission granted – check if location services (GPS) are on.
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      await Geolocator.openLocationSettings();
+      // Still continue: getLastKnownPosition or default may apply when user returns.
+    }
+
     locationLoading.value = true;
     try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
-      print(position.latitude);
-      print(position.longitude);
-      final index = _indexOfNearestShop(position.latitude, position.longitude);
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 15),
+          ),
+        );
+      } catch (_) {
+        position = null;
+      }
+      // Fallback: last known position (e.g. after emulator sets a mock location once)
+      position ??= await Geolocator.getLastKnownPosition();
+      // Fallback for emulator/no GPS: use first shop so app still works
+      final lat = position?.latitude ?? shopContacts[0].latitude;
+      final lon = position?.longitude ?? shopContacts[0].longitude;
+      final index = _indexOfNearestShop(lat, lon);
       selectedShopIndex.value = index;
     } catch (_) {
       selectShop(0);
@@ -125,6 +142,8 @@ class MainController extends GetxController {
   }
 
   int _indexOfNearestShop(double userLat, double userLon) {
+    print(userLat);
+    print(userLon);
     int nearest = 0;
     double minDist = double.infinity;
     for (int i = 0; i < shopContacts.length; i++) {
