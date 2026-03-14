@@ -14,80 +14,175 @@ class MainScreen extends GetView<MainController> {
     return Scaffold(
       backgroundColor: colorBackground,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Logo
-            Padding(
-              padding: const EdgeInsets.only(top: 16),
-              child: Image.asset('assets/logo.png', width: 120, height: 120, fit: BoxFit.contain),
-            ),
-            // Label
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                'Order For Rckcp',
-                style: GoogleFonts.roboto(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: colorOnBackground,
+        child: _AnimatedLogoLayout(
+          child: Column(
+            children: [
+              // Placeholder for logo (height matches final logo + padding + label)
+              const SizedBox(height: 16 + 120 + 8 + 24),
+              // 3 action buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _ActionButton(
+                        label: 'Waikiki',
+                        onPressed: () {
+                          controller.openWaikiki();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _ActionButton(
+                        label: 'Kaaawa',
+                        onPressed: () => _showKaaawaHoursDialog(context, controller),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _ActionButton(
+                        label: 'Shop Online',
+                        onPressed: () {
+                          controller.openShopOnline();
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            // 3 action buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _ActionButton(
-                      label: 'Waikiki',
-                      onPressed: () {
-                        controller.openWaikiki();
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ActionButton(
-                      label: 'Kaaawa',
-                      onPressed: () => _showKaaawaHoursDialog(context, controller),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ActionButton(
-                      label: 'Shop Online',
-                      onPressed: () {
-                        controller.openShopOnline();
-                      },
-                    ),
-                  ),
-                ],
+              // Contact Info section
+              _ContactSection(controller: controller),
+              // News feed (scrollable only here)
+              Expanded(
+                child: _NewsSection(controller: controller),
               ),
-            ),
-            // Contact Info section
-            _ContactSection(controller: controller),
-            // News feed (scrollable only here)
-            Expanded(
-              child: _NewsSection(controller: controller), 
-            ),
-            // Social icons
-            Padding(
-              padding: EdgeInsets.only(top: 1, bottom: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // _SocialIcon(icon: FontAwesomeIcons.linkedin, onTap: () {}),
-                  // const SizedBox(width: 24),
-                  _SocialIcon(icon: FontAwesomeIcons.facebook, onTap: () {controller.openUrl("https://www.facebook.com/profile.php?id=61557040718686");}),
-                  const SizedBox(width: 24),
-                  _SocialIcon(icon: FontAwesomeIcons.instagram, onTap: () {controller.openUrl("https://www.instagram.com/halatreecafe/");}),
-                ],
+              // Social icons
+              Padding(
+                padding: EdgeInsets.only(top: 1, bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _SocialIcon(icon: FontAwesomeIcons.facebook, onTap: () {controller.openUrl("https://www.facebook.com/profile.php?id=61557040718686");}),
+                    const SizedBox(width: 24),
+                    _SocialIcon(icon: FontAwesomeIcons.instagram, onTap: () {controller.openUrl("https://www.instagram.com/halatreecafe/");}),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Layout that shows the logo animating from center (splash position) to top.
+class _AnimatedLogoLayout extends StatefulWidget {
+  final Widget child;
+
+  const _AnimatedLogoLayout({required this.child});
+
+  @override
+  State<_AnimatedLogoLayout> createState() => _AnimatedLogoLayoutState();
+}
+
+class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
+    with SingleTickerProviderStateMixin {
+  static const double _logoStartSize = 140.0;
+  static const double _logoEndSize = 120.0;
+  static const double _topPadding = 16.0;
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOutCubic,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final padding = MediaQuery.paddingOf(context);
+    final safeHeight = size.height - padding.top - padding.bottom;
+    final centerY = (safeHeight / 2) - (_logoStartSize / 2);
+    final endY = _topPadding;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AnimatedBuilder(
+          animation: _animation,
+          builder: (context, _) => Opacity(
+            opacity: _animation.value,
+            child: widget.child,
+          ),
+        ),
+        AnimatedBuilder(
+          animation: _animation,
+          builder: (context, _) {
+            final t = _animation.value;
+            final top = centerY + (endY - centerY) * t;
+            final logoSize = _logoStartSize + (_logoEndSize - _logoStartSize) * t;
+            return Positioned(
+              left: 0,
+              right: 0,
+              top: top,
+              child: Center(
+                child: SizedBox(
+                  width: logoSize,
+                  height: logoSize,
+                  child: Image.asset(
+                    'assets/logo.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+        // Label fades in and stays under the logo area
+        AnimatedBuilder(
+          animation: _animation,
+          builder: (context, _) {
+            final t = _animation.value;
+            final top = _topPadding + _logoEndSize + 8;
+            return Positioned(
+              left: 0,
+              right: 0,
+              top: top,
+              child: Opacity(
+                opacity: t.clamp(0.0, 1.0),
+                child: Text(
+                  'Order For Rckcp',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.roboto(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: colorOnBackground,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
