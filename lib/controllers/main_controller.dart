@@ -1,61 +1,103 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../models/news_model.dart';
 import '../utils/constants.dart';
 import '../webservice/api.dart';
 import '../webservice/dio_util.dart';
 
+class ShopContact {
+  final String name;
+  final String phone;
+  final String email;
+  final String website;
+
+  const ShopContact({
+    required this.name,
+    required this.phone,
+    required this.email,
+    required this.website,
+  });
+}
 
 class MainController extends GetxController {
   final cache = GetStorage();
   late Api apiClient;
+
+  static const List<ShopContact> shopContacts = [
+    ShopContact(
+      name: 'Waikiki',
+      phone: 'tel:+1234567890',
+      email: 'mailto:waikiki@halatree.com',
+      website: 'https://halatree.com/waikiki',
+    ),
+    ShopContact(
+      name: 'Kaaawa',
+      phone: 'tel:+1234567891',
+      email: 'mailto:kaaawa@halatree.com',
+      website: 'https://halatree.com/kaaawa',
+    ),
+    ShopContact(
+      name: 'Captain Cook',
+      phone: 'tel:+1234567892',
+      email: 'mailto:captaincook@halatree.com',
+      website: 'https://halatree.com/captaincook',
+    ),
+  ];
+
+  final selectedShopIndex = 0.obs;
+  final newsHtml = ''.obs;
+  final newsLoading = false.obs;
+
+  ShopContact get selectedContact => shopContacts[selectedShopIndex.value];
+
   @override
   void onInit() {
     super.onInit();
-    apiClient = Api(DioUtil(null).getDio(),baseUrl: DioUtil.mainUrl!);
-
+    apiClient = Api(DioUtil(null).getDio(), baseUrl: DioUtil.mainUrl!);
     initData();
   }
 
-
-  void initData() async{
-    Future.delayed(const Duration(seconds: 2), () {
-      //getNewsData();
-    });
+  void initData() async {
+    getNewsData();
   }
 
-  void getNewsData() async{
+  void selectShop(int index) {
+    selectedShopIndex.value = index;
+  }
+
+  Future<void> openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  void callUs() => openUrl(selectedContact.phone);
+  void emailUs() => openUrl(selectedContact.email);
+  void openWebsite() => openUrl(selectedContact.website);
+
+  void getNewsData() async {
     bool isNetwork = await Constants.checkNetwork();
-    if(!isNetwork){
+    if (!isNetwork) {
       showToastMessage("You are working with offline mode");
-
-    }else{
-        apiClient = Api(DioUtil(null).getDio(),baseUrl: DioUtil.mainUrl!);
-
-        await apiClient.getnews().then((value) {
-          // hasUnreadNoti.value = value.unread_count!=null && value.unread_count!>0?true: false;
-          // if(fromScreen=="loginbtn") dismissDialog();
-          // if(value.message=="success"){
-          //   if(Platform.isAndroid && value.versionModel != null){
-          //     checkVersionData(value, fromScreen, email, password);
-          //   }else{
-          //     gotoNextPage(value, fromScreen,email, password);
-          //   }
-          //
-          // }else{
-          //   loginVisible.value = true;
-          //   showToastMessage(value.message??"Unknown error");
-          // }
-        }).onError((err, stackTrace) {
-          // if(fromScreen=="loginbtn") dismissDialog();
-          // loginVisible.value = true;
-          // if (err is DioException) {
-          //   showToastMessage("DIO error");
-          // }else{
-          //   showToastMessage("unknownerror");
-          // }
-        }
-        );
+      newsHtml.value = '<p>News will appear here when available.</p>';
+      return;
+    }
+    newsLoading.value = true;
+    try {
+      apiClient = Api(DioUtil(null).getDio(), baseUrl: DioUtil.mainUrl!);
+      final value = await apiClient.getnews();
+      if (value.newsData?.news_content != null && value.newsData!.news_content!.isNotEmpty) {
+        newsHtml.value = value.newsData!.news_content!;
+      } else {
+        newsHtml.value = '<p>News will appear here when available.</p>';
+      }
+    } catch (e) {
+      newsHtml.value = '<p>News will appear here when available.</p>';
+    } finally {
+      newsLoading.value = false;
     }
   }
 }

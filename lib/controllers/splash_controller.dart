@@ -17,7 +17,7 @@ class SplashController extends GetxController {
   }
 
   void initData() async{
-    Future.delayed(const Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 3), () {
       gotoNextView();
     });
   }
