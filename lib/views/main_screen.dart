@@ -465,11 +465,17 @@ class _NewsSection extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
+          Obx(() {
+            if (controller.newsLoading.value) {
+              return const LinearProgressIndicator(
+                color: colorPrimary,
+                backgroundColor: colorOutline,
+              );
+            }
+            return const SizedBox.shrink();
+          }),
           Expanded(
             child: Obx(() {
-              if (controller.newsLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: colorPrimary));
-              }
               final url = controller.newsUrl.value;
               if (url.isEmpty) {
                 return _newsUnavailableMessage();

@@ -220,7 +220,10 @@ class MainController extends GetxController {
               return NavigationDecision.prevent;
             },
             onPageStarted: (url) => debugPrint('[News] WebView onPageStarted: $url'),
-            onPageFinished: (url) => debugPrint('[News] WebView onPageFinished: $url'),
+            onPageFinished: (url) {
+              debugPrint('[News] WebView onPageFinished: $url');
+              newsLoading.value = false;
+            },
             onWebResourceError: (error) {
               debugPrint('[News] WebView onWebResourceError: isForMainFrame=${error.isForMainFrame}, '
                   'errorCode=${error.errorCode}, description=${error.description}');
@@ -251,13 +254,13 @@ class MainController extends GetxController {
       debugPrint('[News] stack: $stack');
       _showNewsUnavailable();
     } finally {
-      newsLoading.value = false;
-      debugPrint('[News] getNewsData() finished (loading=false)');
+      debugPrint('[News] getNewsData() setup finished');
     }
   }
 
   void _showNewsUnavailable() {
     debugPrint('[News] _showNewsUnavailable() – clearing URL and controller');
+    newsLoading.value = false;
     newsUrl.value = '';
     newsWebViewController = null;
   }
