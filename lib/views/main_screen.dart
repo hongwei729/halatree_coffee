@@ -73,12 +73,12 @@ class MainScreen extends GetView<MainController> {
             ),
             // Social icons
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.only(top: 1, bottom: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _SocialIcon(icon: FontAwesomeIcons.linkedin, onTap: () {}),
-                  const SizedBox(width: 24),
+                  // _SocialIcon(icon: FontAwesomeIcons.linkedin, onTap: () {}),
+                  // const SizedBox(width: 24),
                   _SocialIcon(icon: FontAwesomeIcons.facebook, onTap: () {controller.openUrl("https://www.facebook.com/profile.php?id=61557040718686");}),
                   const SizedBox(width: 24),
                   _SocialIcon(icon: FontAwesomeIcons.instagram, onTap: () {controller.openUrl("https://www.instagram.com/halatreecafe/");}),
