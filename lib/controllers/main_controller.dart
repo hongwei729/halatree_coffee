@@ -211,6 +211,14 @@ class MainController extends GetxController {
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setNavigationDelegate(
           NavigationDelegate(
+            onNavigationRequest: (NavigationRequest request) async {
+              final requestedUrl = request.url;
+              if (requestedUrl == url || requestedUrl.startsWith(baseUrl)) {
+                return NavigationDecision.navigate;
+              }
+              await openUrl(requestedUrl);
+              return NavigationDecision.prevent;
+            },
             onPageStarted: (url) => debugPrint('[News] WebView onPageStarted: $url'),
             onPageFinished: (url) => debugPrint('[News] WebView onPageFinished: $url'),
             onWebResourceError: (error) {
