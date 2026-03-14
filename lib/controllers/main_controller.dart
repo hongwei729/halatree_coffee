@@ -58,7 +58,7 @@ class MainController extends GetxController {
       longitude: -157.862947,
     ),
     ShopContact(
-      name: 'Hala Tree Cafe Captain Cook',
+      name: 'Hala Tree Captain Cook',
       phone: 'tel:+18082385005',
       email: 'mailto:captaincook@halatree.com',
       website: 'https://halatree.com/captaincook',
@@ -281,6 +281,10 @@ class MainController extends GetxController {
 
   void openShopOnline() {
     openUrl("https://www.halatreecoffee.com");
+  }
+
+  void openLoyaltyProgram() {
+    openUrl("https://www.halatreecoffee.com"); // TODO: replace with loyalty program URL
   }
 
 }

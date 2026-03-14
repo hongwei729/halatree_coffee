@@ -15,10 +15,11 @@ class MainScreen extends GetView<MainController> {
       backgroundColor: colorBackground,
       body: SafeArea(
         child: _AnimatedLogoLayout(
+          onLoyaltyProgramPressed: () => controller.openLoyaltyProgram(),
           child: Column(
             children: [
-              // Placeholder for logo (height matches final logo + padding + label)
-              const SizedBox(height: 16 + 120 + 8 + 24),
+              // Placeholder for logo + Pickup label + Loyalty button
+              const SizedBox(height: 16 + 120 + 8 + 24 + 8 + 40),
               // 3 action buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -80,8 +81,12 @@ class MainScreen extends GetView<MainController> {
 /// Layout that shows the logo animating from center (splash position) to top.
 class _AnimatedLogoLayout extends StatefulWidget {
   final Widget child;
+  final VoidCallback? onLoyaltyProgramPressed;
 
-  const _AnimatedLogoLayout({required this.child});
+  const _AnimatedLogoLayout({
+    required this.child,
+    this.onLoyaltyProgramPressed,
+  });
 
   @override
   State<_AnimatedLogoLayout> createState() => _AnimatedLogoLayoutState();
@@ -157,12 +162,36 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
             );
           },
         ),
-        // Label fades in and stays under the logo area
+        // Loyalty Program button directly under the logo
         AnimatedBuilder(
           animation: _animation,
           builder: (context, _) {
             final t = _animation.value;
-            final top = _topPadding + _logoEndSize + 8;
+            const buttonHeight = 48.0;
+            const gap = 8.0;
+            final top = _topPadding + _logoEndSize + gap;
+            return Positioned(
+              left: 24,
+              right: 24,
+              top: top,
+              child: Opacity(
+                opacity: t.clamp(0.0, 1.0),
+                child: _ActionButton(
+                  label: 'Loyalty Program',
+                  onPressed: widget.onLoyaltyProgramPressed ?? () {},
+                ),
+              ),
+            );
+          },
+        ),
+        // "Pickup" label below the Loyalty Program button
+        AnimatedBuilder(
+          animation: _animation,
+          builder: (context, _) {
+            final t = _animation.value;
+            const buttonHeight = 48.0;
+            const gap = 8.0;
+            final top = _topPadding + _logoEndSize + gap + buttonHeight + gap;
             return Positioned(
               left: 0,
               right: 0,
@@ -170,7 +199,7 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
               child: Opacity(
                 opacity: t.clamp(0.0, 1.0),
                 child: Text(
-                  'Order For Rckcp',
+                  'Pickup',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.roboto(
                     fontSize: 18,
