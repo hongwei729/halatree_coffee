@@ -3,8 +3,8 @@ import 'package:coffee/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class MainScreen extends GetView<MainController> {
   const MainScreen({super.key});
@@ -316,14 +316,28 @@ class _NewsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Text(
-              'News',
-              style: GoogleFonts.roboto(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: colorOnBackground,
-              ),
+            padding: const EdgeInsets.fromLTRB(16, 8, 8, 6),
+            child: Row(
+              children: [
+                Text(
+                  'News',
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: colorOnBackground,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: controller.reloadNews,
+                  icon: const Icon(Icons.refresh),
+                  color: colorOnBackground,
+                  style: IconButton.styleFrom(
+                    padding: const EdgeInsets.all(4),
+                    minimumSize: const Size(36, 36),
+                  ),
+                ),
+              ],
             ),
           ),
           const Divider(height: 1),
@@ -332,37 +346,34 @@ class _NewsSection extends StatelessWidget {
               if (controller.newsLoading.value) {
                 return const Center(child: CircularProgressIndicator(color: colorPrimary));
               }
-              final html = controller.newsHtml.value;
-              if (html.isEmpty) {
-                return Center(
-                  child: Text(
-                    'No news yet.',
-                    style: GoogleFonts.roboto(color: colorOnSurface),
-                  ),
-                );
+              final url = controller.newsUrl.value;
+              if (url.isEmpty) {
+                return _newsUnavailableMessage();
               }
-              return SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Html(
-                  data: html,
-                  style: {
-                    'body': Style(
-                      fontSize: FontSize(14),
-                      color: colorOnSurface,
-                    ),
-                    'p': Style(
-                      fontSize: FontSize(14),
-                    ),
-                  },
-                  shrinkWrap: true,
-                ),
-              );
+              final webController = controller.newsWebViewController;
+              if (webController == null) {
+                return _newsUnavailableMessage();
+              }
+              return WebViewWidget(controller: webController);
             }),
           ),
         ],
       ),
     );
   }
+}
+
+Widget _newsUnavailableMessage() {
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(
+        'News will be shown when it\'s available.',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.roboto(color: colorOnSurface, fontSize: 14),
+      ),
+    ),
+  );
 }
 
 class _SocialIcon extends StatelessWidget {

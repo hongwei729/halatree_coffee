@@ -1,9 +1,11 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../utils/constants.dart';
 import '../webservice/api.dart';
 import '../webservice/dio_util.dart';
@@ -66,8 +68,10 @@ class MainController extends GetxController {
   ];
 
   final selectedShopIndex = 0.obs;
-  final newsHtml = ''.obs;
+  /// URL to load in the news WebView; empty when offline or on error.
+  final newsUrl = ''.obs;
   final newsLoading = false.obs;
+  WebViewController? newsWebViewController;
   /// True while fetching user location to select nearest shop.
   final locationLoading = false.obs;
 
@@ -190,25 +194,65 @@ class MainController extends GetxController {
   void openWebsite() => openUrl(selectedContact.website);
 
   void getNewsData() async {
+    debugPrint('[News] getNewsData() started');
     bool isNetwork = await Constants.checkNetwork();
     if (!isNetwork) {
-      showToastMessage("You are working with offline mode");
-      newsHtml.value = '<p>News will appear here when available.</p>';
+      debugPrint('[News] No network – showing unavailable');
+      newsUrl.value = '';
       return;
     }
+    debugPrint('[News] Network OK, loading URL...');
     newsLoading.value = true;
     try {
-      apiClient = Api(DioUtil(null).getDio(), baseUrl: DioUtil.mainUrl!);
-      final value = await apiClient.getnews();
-      if (value.newsData?.news_content != null && value.newsData!.news_content!.isNotEmpty) {
-        newsHtml.value = value.newsData!.news_content!;
-      } else {
-        newsHtml.value = '<p>News will appear here when available.</p>';
-      }
-    } catch (e) {
-      newsHtml.value = '<p>News will appear here when available.</p>';
+      final url = '${baseUrl}getnewscontent';
+      newsUrl.value = url;
+      debugPrint('[News] Loading: $url');
+      newsWebViewController = WebViewController()
+        ..setJavaScriptMode(JavaScriptMode.unrestricted)
+        ..setNavigationDelegate(
+          NavigationDelegate(
+            onPageStarted: (url) => debugPrint('[News] WebView onPageStarted: $url'),
+            onPageFinished: (url) => debugPrint('[News] WebView onPageFinished: $url'),
+            onWebResourceError: (error) {
+              debugPrint('[News] WebView onWebResourceError: isForMainFrame=${error.isForMainFrame}, '
+                  'errorCode=${error.errorCode}, description=${error.description}');
+              if (error.isForMainFrame == true) _showNewsUnavailable();
+            },
+            onHttpError: (error) {
+              final uri = error.response?.uri;
+              debugPrint('[News] WebView onHttpError: statusCode=${error.response?.statusCode}, uri=$uri');
+              // Only show fallback if this is the main document (uri matches our news URL).
+              // When uri is null it may be a subresource 404 – don't clear the WebView.
+              if (uri != null && uri.toString() == url) {
+                debugPrint('[News] WebView onHttpError is main doc – showing unavailable');
+                _showNewsUnavailable();
+              }
+            },
+          ),
+        )
+        ..loadRequest(Uri.parse(url));
+    } catch (e, stack) {
+      debugPrint('[News] getNewsData exception: $e');
+      debugPrint('[News] stack: $stack');
+      _showNewsUnavailable();
     } finally {
       newsLoading.value = false;
+      debugPrint('[News] getNewsData() finished (loading=false)');
+    }
+  }
+
+  void _showNewsUnavailable() {
+    debugPrint('[News] _showNewsUnavailable() – clearing URL and controller');
+    newsUrl.value = '';
+    newsWebViewController = null;
+  }
+
+  /// Reload the news WebView if it is available.
+  void reloadNews() {
+    if (newsWebViewController != null && newsUrl.value.isNotEmpty) {
+      newsWebViewController!.reload();
+    } else {
+      getNewsData();
     }
   }
 
