@@ -81,9 +81,9 @@ class MainScreen extends GetView<MainController> {
                 children: [
                   _SocialIcon(icon: FontAwesomeIcons.linkedin, onTap: () {}),
                   const SizedBox(width: 24),
-                  _SocialIcon(icon: FontAwesomeIcons.facebook, onTap: () {}),
+                  _SocialIcon(icon: FontAwesomeIcons.facebook, onTap: () {controller.openUrl("https://www.facebook.com/profile.php?id=61557040718686");}),
                   const SizedBox(width: 24),
-                  _SocialIcon(icon: FontAwesomeIcons.instagram, onTap: () {}),
+                  _SocialIcon(icon: FontAwesomeIcons.instagram, onTap: () {controller.openUrl("https://www.instagram.com/halatreecafe/");}),
                 ],
               ),
             ),

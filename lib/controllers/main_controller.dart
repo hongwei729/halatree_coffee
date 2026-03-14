@@ -69,8 +69,10 @@ class MainController extends GetxController {
 
   Future<void> openUrl(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
+    try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      showToastMessage("Could not open link");
     }
   }
 
