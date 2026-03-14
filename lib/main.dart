@@ -60,7 +60,7 @@ class HomePageState extends State {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: colorPrimary,
+            backgroundColor: colorPrimaryDark,
             foregroundColor: colorOnPrimary,
             textStyle: GoogleFonts.roboto(fontWeight: FontWeight.w600),
             elevation: 1,
@@ -68,8 +68,8 @@ class HomePageState extends State {
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            foregroundColor: colorPrimaryDark,
-            side: const BorderSide(color: colorPrimary),
+            foregroundColor: colorOnBackground,
+            side: const BorderSide(color: colorPrimaryDark),
             textStyle: GoogleFonts.roboto(fontWeight: FontWeight.w500),
           ),
         ),

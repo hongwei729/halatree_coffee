@@ -133,7 +133,7 @@ class _ActionButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        backgroundColor: colorPrimary,
+        backgroundColor: colorPrimaryDark,
         foregroundColor: colorOnPrimary,
       ),
       child: Text(
@@ -216,7 +216,7 @@ class _ContactSection extends StatelessWidget {
                 style: ButtonStyle(
                   alignment: Alignment.center,
                   backgroundColor: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected)) return colorPrimary;
+                    if (states.contains(WidgetState.selected)) return colorPrimaryDark;
                     return colorSurface;
                   }),
                   foregroundColor: WidgetStateProperty.resolveWith((states) {
@@ -251,8 +251,8 @@ class _ContactSection extends StatelessWidget {
                   icon: const Icon(Icons.phone_outlined, size: 18),
                   label: const Text('Call Us'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: colorPrimaryDark,
-                    side: const BorderSide(color: colorPrimary),
+                    foregroundColor: colorOnBackground,
+                    side: const BorderSide(color: colorPrimaryDark),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
@@ -264,8 +264,8 @@ class _ContactSection extends StatelessWidget {
                   icon: const Icon(Icons.email_outlined, size: 18),
                   label: const Text('Email Us'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: colorPrimaryDark,
-                    side: const BorderSide(color: colorPrimary),
+                    foregroundColor: colorOnBackground,
+                    side: const BorderSide(color: colorPrimaryDark),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
@@ -277,8 +277,8 @@ class _ContactSection extends StatelessWidget {
                   icon: const Icon(Icons.language, size: 18),
                   label: const Text('Website'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: colorPrimaryDark,
-                    side: const BorderSide(color: colorPrimary),
+                    foregroundColor: colorOnBackground,
+                    side: const BorderSide(color: colorPrimaryDark),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
