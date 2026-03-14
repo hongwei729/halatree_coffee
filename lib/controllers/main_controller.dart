@@ -33,6 +33,14 @@ class MainController extends GetxController {
   final cache = GetStorage();
   late Api apiClient;
 
+  /// Kaaawa location index in [shopContacts].
+  static const int kaaawaShopIndex = 1;
+
+  /// Shown when user selects Kaaawa: contact only during these hours.
+  static const String kaaawaHoursMessage =
+      'Hala Tree Cafe Kaaawa is open 7am to 4pm every day. '
+      'You can only reach us during these hours.';
+
   static const List<ShopContact> shopContacts = [
     ShopContact(
       name: 'Hala Tree Cafe Waikiki',

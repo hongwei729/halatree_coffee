@@ -50,9 +50,7 @@ class MainScreen extends GetView<MainController> {
                   Expanded(
                     child: _ActionButton(
                       label: 'Kaaawa',
-                      onPressed: () {
-                        controller.openKaaawa();
-                      },
+                      onPressed: () => _showKaaawaHoursDialog(context, controller),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -92,6 +90,35 @@ class MainScreen extends GetView<MainController> {
       ),
     );
   }
+}
+
+void _showKaaawaHoursDialog(BuildContext context, MainController controller) {
+  showDialog<void>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(
+        'Kaaawa hours',
+        style: GoogleFonts.roboto(fontWeight: FontWeight.w600),
+      ),
+      content: Text(
+        MainController.kaaawaHoursMessage,
+        style: GoogleFonts.roboto(fontSize: 14),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Close'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            controller.openKaaawa();
+          },
+          child: const Text('Order Online'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ActionButton extends StatelessWidget {
@@ -199,6 +226,22 @@ class _ContactSection extends StatelessWidget {
                   padding: WidgetStateProperty.all(const EdgeInsets.symmetric(vertical: 10)),
                 ),
               )),
+          Obx(() {
+            if (controller.selectedShopIndex.value != MainController.kaaawaShopIndex) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                MainController.kaaawaHoursMessage,
+                style: GoogleFonts.roboto(
+                  fontSize: 12,
+                  color: colorOnSurface.withValues(alpha: 0.85),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            );
+          }),
           const SizedBox(height: 8),
           Row(
             children: [
