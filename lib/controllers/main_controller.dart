@@ -43,25 +43,25 @@ class MainController extends GetxController {
   static const List<ShopContact> shopContacts = [
     ShopContact(
       name: 'Hala Tree Cafe Waikiki',
-      phone: 'tel:+1234567890',
-      email: 'mailto:waikiki@halatree.com',
-      website: 'https://halatree.com/waikiki',
+      phone: '',
+      email: '',
+      website: '',
       latitude: 21.278432,
       longitude: -157.824195,
     ),
     ShopContact(
       name: 'Hala Tree Cafe Kaaawa',
-      phone: 'tel:+1234567891',
-      email: 'mailto:kaaawa@halatree.com',
-      website: 'https://halatree.com/kaaawa',
+      phone: 'tel:+17815662669',
+      email: 'mailto:info@halatreecafe.com',
+      website: 'https://www.halatreecafe.com/',
       latitude: 21.559102,
       longitude: -157.862947,
     ),
     ShopContact(
       name: 'Hala Tree Captain Cook',
       phone: 'tel:+18082385005',
-      email: 'mailto:captaincook@halatree.com',
-      website: 'https://halatree.com/captaincook',
+      email: 'mailto:sales@halatreecoffee.com',
+      website: 'https://halatreecoffee.com/',
       latitude: 19.482207,
       longitude: -155.898887,
     ),
@@ -181,6 +181,10 @@ class MainController extends GetxController {
   }
 
   Future<void> openUrl(String url) async {
+    if(url.isEmpty){
+      showToastMessage("Coming Soon");
+      return;
+    }
     final uri = Uri.parse(url);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -287,7 +291,7 @@ class MainController extends GetxController {
   }
 
   void openLoyaltyProgram() {
-    openUrl("https://www.halatreecoffee.com"); // TODO: replace with loyalty program URL
+    openUrl("https://start.mylty.co/login?id=18240"); // TODO: replace with loyalty program URL
   }
 
 }
