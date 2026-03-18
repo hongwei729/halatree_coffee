@@ -217,6 +217,16 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
 }
 
 void _showKaaawaHoursDialog(BuildContext context, MainController controller) {
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month, now.day, 7, 0);
+  final end = DateTime(now.year, now.month, now.day, 16, 0);
+
+  final isWithinHours = !now.isBefore(start) && !now.isAfter(end);
+  if (isWithinHours) {
+    controller.openKaaawa();
+    return;
+  }
+
   showDialog<void>(
     context: context,
     builder: (context) => AlertDialog(
