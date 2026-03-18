@@ -68,5 +68,13 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We use your location to show the nearest Hala Tree Coffee shop contact info.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>sms</string>
+		<string>https</string>
+		<string>http</string>
+	</array>
 </dict>
 </plist>

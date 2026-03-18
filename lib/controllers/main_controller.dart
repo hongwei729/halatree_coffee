@@ -187,7 +187,16 @@ class MainController extends GetxController {
     }
     final uri = Uri.parse(url);
     try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        // Common on iOS Simulator: no Phone/Mail app for tel:/mailto:
+        final isTelOrMail = uri.scheme == 'tel' || uri.scheme == 'mailto';
+        showToastMessage(
+          isTelOrMail
+              ? "Phone and email links need a real device (not supported on simulator)."
+              : "Could not open link",
+        );
+      }
     } catch (e) {
       showToastMessage("Could not open link");
     }
