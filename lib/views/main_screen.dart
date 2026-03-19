@@ -54,6 +54,14 @@ class MainScreen extends GetView<MainController> {
               ),
               // Contact Info section
               _ContactSection(controller: controller),
+              Container(
+                width: MediaQuery.sizeOf(context).width,
+                padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 0),
+                child: _ActionButton(
+                    label: 'Book a tour or workshop',
+                    onPressed: () {controller.openUrl("https://halatreecoffee.com/farm-tour/");},
+                ),
+              ),
               // News feed (scrollable only here)
               Expanded(
                 child: _NewsSection(controller: controller),
