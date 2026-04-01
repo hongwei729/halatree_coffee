@@ -34,8 +34,10 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We use your location to provide nearby Hala Tree Coffee locations, enable location-based features like ordering and menu access, and support background updates for a seamless and personalized experience.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to show the nearest Hala Tree Coffee shop contact info.</string>
+	<string>We use your location to show nearby Hala Tree Coffee locations, display relevant store information, and enable location-based features like ordering and menu access.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
