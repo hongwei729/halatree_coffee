@@ -1,4 +1,5 @@
 import 'package:coffee/models/news_model.dart';
+import 'package:coffee/models/transaction_history_model.dart';
 import 'package:coffee/models/user_model.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -29,6 +30,9 @@ class GeneralResponse {
   String? verification_code;
   @JsonKey(name: 'new_amount', fromJson: nullableStringFromDynamic)
   String? new_amount;
+
+  @JsonKey(name: 'transactions')
+  List<TransactionHistoryModel>? transactions;
 
   GeneralResponse();
 

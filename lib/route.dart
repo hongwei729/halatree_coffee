@@ -3,6 +3,7 @@ import 'package:coffee/controllers/forgot_password_controller.dart';
 import 'package:coffee/controllers/login_controller.dart';
 import 'package:coffee/controllers/main_controller.dart';
 import 'package:coffee/controllers/profile_controller.dart';
+import 'package:coffee/controllers/redeem_history_controller.dart';
 import 'package:coffee/controllers/signup_controller.dart';
 import 'package:coffee/controllers/splash_controller.dart';
 import 'package:coffee/views/forgot_password_screen.dart';
@@ -56,7 +57,10 @@ abstract class Routes {
         })),
     GetPage(
         name: RouteName.redeemHistoryView,
-        page: () => const RedeemHistoryScreen()),
+        page: () => const RedeemHistoryScreen(),
+        binding: BindingsBuilder(() {
+          Get.put(RedeemHistoryController());
+        })),
     GetPage(
         name: RouteName.loginView,
         page: () => const LoginScreen(),

@@ -78,4 +78,12 @@ abstract class Api {
     @Field("redeem_code") String redeemCode,
   );
 
+  @FormUrlEncoded()
+  @POST("gettransactionhistory")
+  Future<GeneralResponse> gettransactionhistory(
+    @Field("id") String userId,
+    @Field("redeem_type") String redeemType,
+    @Field("source") String source,
+  );
+
 }
