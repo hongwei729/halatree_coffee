@@ -17,6 +17,6 @@ abstract class Api {
   Future<GeneralResponse> getnews(
       // @Part(name: "user_email") String email,
       // @Part(name: "user_password") String password,
-      );
+  );
 
 }
