@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import 'general_response.dart';
@@ -17,6 +16,36 @@ abstract class Api {
   Future<GeneralResponse> getnews(
       // @Part(name: "user_email") String email,
       // @Part(name: "user_password") String password,
+  );
+
+  @FormUrlEncoded()
+  @POST("halatreeusersignup")
+  Future<GeneralResponse> halatreeusersignup(
+    @Field("email") String email,
+    @Field("first_name") String firstName,
+    @Field("last_name") String lastName,
+    @Field("password") String password,
+  );
+
+  @FormUrlEncoded()
+  @POST("halatreeuserlogin")
+  Future<GeneralResponse> halatreeuserlogin(
+    @Field("email") String email,
+    @Field("password") String password,
+  );
+
+  @FormUrlEncoded()
+  @POST("requesthalatreeforgotpassword")
+  Future<GeneralResponse> requesthalatreeforgotpassword(
+    @Field("email") String email,
+  );
+
+  @FormUrlEncoded()
+  @POST("changepassword")
+  Future<GeneralResponse> changepassword(
+    @Field("email") String email,
+    @Field("otp") String otp,
+    @Field("password") String newPassword,
   );
 
 }

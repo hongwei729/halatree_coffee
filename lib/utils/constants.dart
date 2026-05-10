@@ -1,3 +1,4 @@
+import 'package:coffee/models/user_model.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -18,6 +19,7 @@ showToastMessage(String message){
 }
 
 class Constants{
+  static UserModel? userModel;
   static Future<bool> checkNetwork() async{
     bool isConnected = true;
     final List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());

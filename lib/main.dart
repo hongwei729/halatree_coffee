@@ -1,8 +1,6 @@
-import 'package:coffee/controllers/splash_controller.dart';
 import 'package:coffee/route.dart';
 import 'package:coffee/utils/color.dart';
 import 'package:coffee/utils/constants.dart';
-import 'package:coffee/views/splash_screen.dart';
 import 'package:coffee/webservice/dio_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -25,11 +23,6 @@ class MyApp extends StatefulWidget {
 }
 
 class HomePageState extends State {
-  final cache = GetStorage();
-  @override
-  void initState() {
-    super.initState();
-  }
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -77,11 +70,7 @@ class HomePageState extends State {
           ),
         ),
       ),
-      home: const SplashScreen(),
-      initialRoute: '/',
-      initialBinding: BindingsBuilder(() {
-        Get.put(SplashController());
-      }),
+      initialRoute: RouteName.splashView,
       getPages: Routes.routes,
       defaultTransition: Transition.fadeIn,
     );

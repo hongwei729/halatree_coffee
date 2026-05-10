@@ -9,12 +9,20 @@ part of 'general_response.dart';
 GeneralResponse _$GeneralResponseFromJson(Map<String, dynamic> json) =>
     GeneralResponse()
       ..message = json['message'] as String?
+      ..status = nullableStatusFromJson(json['status'])
       ..newsData = json['newsData'] == null
           ? null
-          : NewsModel.fromJson(json['newsData'] as Map<String, dynamic>);
+          : NewsModel.fromJson(json['newsData'] as Map<String, dynamic>)
+      ..user = json['user'] == null
+          ? null
+          : UserModel.fromJson(json['user'] as Map<String, dynamic>)
+      ..verification_code = json['verification_code'] as String?;
 
 Map<String, dynamic> _$GeneralResponseToJson(GeneralResponse instance) =>
     <String, dynamic>{
       'message': instance.message,
+      'status': instance.status,
       'newsData': instance.newsData,
+      'user': instance.user,
+      'verification_code': instance.verification_code,
     };

@@ -49,8 +49,9 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _logoController.forward().then((_) {
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (mounted) Get.find<SplashController>().gotoNextView();
+      Future.delayed(const Duration(milliseconds: 800), () async {
+        if (!mounted) return;
+        await Get.find<SplashController>().onSplashAnimationComplete();
       });
     });
   }

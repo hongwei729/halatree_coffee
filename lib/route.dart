@@ -1,13 +1,23 @@
+import 'package:coffee/controllers/forgot_password_controller.dart';
+import 'package:coffee/controllers/login_controller.dart';
 import 'package:coffee/controllers/main_controller.dart';
+import 'package:coffee/controllers/signup_controller.dart';
 import 'package:coffee/controllers/splash_controller.dart';
+import 'package:coffee/views/forgot_password_screen.dart';
+import 'package:coffee/views/login_screen.dart';
 import 'package:coffee/views/main_screen.dart';
+import 'package:coffee/views/signup_screen.dart';
 import 'package:coffee/views/splash_screen.dart';
 import 'package:get/get.dart';
 
 
 class RouteName {
   static const String splashView = "/splashView";
-  static const String mainView = "/mainView";}
+  static const String mainView = "/mainView";
+  static const String loginView = "/loginView";
+  static const String signupView = "/signupView";
+  static const String forgotPasswordView = "/forgotPasswordView";
+}
 
 
 abstract class Routes {
@@ -23,7 +33,24 @@ abstract class Routes {
         page: () => const MainScreen(),
         binding: BindingsBuilder(() {
           Get.put(MainController());
-        }))
-
+        })),
+    GetPage(
+        name: RouteName.loginView,
+        page: () => const LoginScreen(),
+        binding: BindingsBuilder(() {
+          Get.put(LoginController());
+        })),
+    GetPage(
+        name: RouteName.signupView,
+        page: () => const SignupScreen(),
+        binding: BindingsBuilder(() {
+          Get.put(SignupController());
+        })),
+    GetPage(
+        name: RouteName.forgotPasswordView,
+        page: () => const ForgotPasswordScreen(),
+        binding: BindingsBuilder(() {
+          Get.put(ForgotPasswordController());
+        })),
   ];
 }
