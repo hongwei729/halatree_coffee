@@ -5,6 +5,35 @@ import 'package:coffee/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+
+DateTime? _parseTransactionTimestamp(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+  // Integer timestamps must run before tryParse: e.g. "1778386442" is wrongly read as
+  // year 177843-05-12 by DateTime.tryParse (compact ISO-like digits).
+  if (RegExp(r'^\d+$').hasMatch(trimmed)) {
+    final n = int.tryParse(trimmed);
+    if (n != null) {
+      if (n > 10000000000) {
+        return DateTime.fromMillisecondsSinceEpoch(n, isUtc: true);
+      }
+      return DateTime.fromMillisecondsSinceEpoch(n * 1000, isUtc: true);
+    }
+    return null;
+  }
+  return DateTime.tryParse(trimmed);
+}
+
+String _formatTransactionTimestamp(BuildContext context, String raw) {
+  final parsed = _parseTransactionTimestamp(raw);
+  if (parsed == null) return raw;
+  final local = parsed.toLocal();
+  final locale = Localizations.localeOf(context).toString();
+  final date = DateFormat.yMMMd(locale).format(local);
+  final time = DateFormat.jm(locale).format(local);
+  return '$date, $time';
+}
 
 class RedeemHistoryScreen extends GetView<RedeemHistoryController> {
   const RedeemHistoryScreen({super.key});
@@ -278,7 +307,7 @@ class _TransactionTile extends StatelessWidget {
                 const Spacer(),
                 if ((tx.created_at ?? '').isNotEmpty)
                   Text(
-                    tx.created_at!,
+                    _formatTransactionTimestamp(context, tx.created_at!),
                     style: GoogleFonts.roboto(fontSize: 12, color: colorOnSurface),
                   ),
               ],
