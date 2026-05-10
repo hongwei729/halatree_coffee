@@ -6,6 +6,8 @@ import 'package:coffee/controllers/splash_controller.dart';
 import 'package:coffee/views/forgot_password_screen.dart';
 import 'package:coffee/views/login_screen.dart';
 import 'package:coffee/views/main_screen.dart';
+import 'package:coffee/views/profile_screen.dart';
+import 'package:coffee/views/redeem_history_screen.dart';
 import 'package:coffee/views/signup_screen.dart';
 import 'package:coffee/views/splash_screen.dart';
 import 'package:get/get.dart';
@@ -17,6 +19,8 @@ class RouteName {
   static const String loginView = "/loginView";
   static const String signupView = "/signupView";
   static const String forgotPasswordView = "/forgotPasswordView";
+  static const String profileView = "/profileView";
+  static const String redeemHistoryView = "/redeemHistoryView";
 }
 
 
@@ -34,6 +38,12 @@ abstract class Routes {
         binding: BindingsBuilder(() {
           Get.put(MainController());
         })),
+    GetPage(
+        name: RouteName.profileView,
+        page: () => const ProfileScreen()),
+    GetPage(
+        name: RouteName.redeemHistoryView,
+        page: () => const RedeemHistoryScreen()),
     GetPage(
         name: RouteName.loginView,
         page: () => const LoginScreen(),

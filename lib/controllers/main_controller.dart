@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../models/user_model.dart';
+import '../route.dart';
 import '../utils/auth_storage.dart';
 import '../utils/constants.dart';
 import '../webservice/api.dart';
@@ -578,6 +579,37 @@ class MainController extends GetxController {
         },
       ),
     );
+  }
+
+  Future<void> confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log out'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) await performLogout();
+  }
+
+  Future<void> performLogout() async {
+    cache.remove(AuthStorage.emailKey);
+    cache.remove(AuthStorage.passwordKey);
+    Constants.userModel = null;
+    await Get.offAllNamed(RouteName.loginView);
+    if (Get.isRegistered<MainController>()) {
+      Get.delete<MainController>(force: true);
+    }
   }
 
 }

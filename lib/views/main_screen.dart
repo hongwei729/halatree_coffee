@@ -1,4 +1,5 @@
 import 'package:coffee/controllers/main_controller.dart';
+import 'package:coffee/route.dart';
 import 'package:coffee/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -129,6 +130,8 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
   /// Extra downward shift for the circle’s resting position (below [_topPadding]).
   static const double _circleRestOffsetY = 14.0;
 
+  final GlobalKey _menuButtonKey = GlobalKey();
+
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -152,6 +155,42 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
     super.dispose();
   }
 
+  Future<void> _openMainMenu() async {
+    final menuContext = _menuButtonKey.currentContext;
+    if (menuContext == null) return;
+    final box = menuContext.findRenderObject() as RenderBox;
+    final overlay =
+        Overlay.of(menuContext).context.findRenderObject() as RenderBox;
+    final position = RelativeRect.fromRect(
+      Rect.fromPoints(
+        box.localToGlobal(Offset.zero, ancestor: overlay),
+        box.localToGlobal(box.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
+    final value = await showMenu<String>(
+      context: menuContext,
+      position: position,
+      items: const [
+        PopupMenuItem(value: 'profile', child: Text('Profile')),
+        PopupMenuItem(value: 'history', child: Text('Redeem History')),
+        PopupMenuItem(value: 'logout', child: Text('Logout')),
+      ],
+    );
+    if (!menuContext.mounted) return;
+    switch (value) {
+      case 'profile':
+        Get.toNamed(RouteName.profileView);
+        break;
+      case 'history':
+        Get.toNamed(RouteName.redeemHistoryView);
+        break;
+      case 'logout':
+        widget.mainController.confirmLogout(menuContext);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -163,6 +202,17 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
     return Stack(
       clipBehavior: Clip.none,
       children: [
+        Positioned(
+          top: _topPadding,
+          right: 4,
+          child: IconButton(
+            key: _menuButtonKey,
+            icon: const Icon(Icons.menu),
+            color: colorOnBackground,
+            tooltip: 'Menu',
+            onPressed: _openMainMenu,
+          ),
+        ),
         AnimatedBuilder(
           animation: _animation,
           builder: (context, _) => Opacity(
