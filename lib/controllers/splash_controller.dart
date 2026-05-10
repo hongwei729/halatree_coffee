@@ -31,6 +31,7 @@ class SplashController extends GetxController {
         try {
           final res = await api.halatreeuserlogin(email, password);
           if (res.message=="success") {
+            Constants.userModel = res.user;
             await Get.offAllNamed(RouteName.mainView);
             return;
           }else{

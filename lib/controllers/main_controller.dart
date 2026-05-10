@@ -6,6 +6,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../models/user_model.dart';
+import '../utils/auth_storage.dart';
 import '../utils/constants.dart';
 import '../webservice/api.dart';
 import '../webservice/dio_util.dart';
@@ -75,18 +77,69 @@ class MainController extends GetxController {
   /// True while fetching user location to select nearest shop.
   final locationLoading = false.obs;
 
+  /// Cached user for loyalty points (synced with [Constants.userModel]).
+  final Rxn<UserModel> currentUser = Rxn<UserModel>();
+
+  /// True while loading / refreshing user data from [getuserdata].
+  final userDataLoading = false.obs;
+
   ShopContact get selectedContact => shopContacts[selectedShopIndex.value];
 
   @override
   void onInit() {
     super.onInit();
     apiClient = Api(DioUtil(null).getDio(), baseUrl: DioUtil.mainUrl!);
+    currentUser.value = Constants.userModel;
     initData();
   }
 
   void initData() async {
     getNewsData();
     ensureLocationAndSelectNearestShop();
+    refreshUserData(silent: true);
+  }
+
+  /// Fetches latest profile and points via [Api.getuserdata]; updates [Constants.userModel].
+  Future<void> refreshUserData({bool silent = false}) async {
+    final email = cache.read(AuthStorage.emailKey)?.toString();
+    final password = cache.read(AuthStorage.passwordKey)?.toString();
+    if (email == null ||
+        email.isEmpty ||
+        password == null ||
+        password.isEmpty) {
+      if (!silent) {
+        showToastMessage('Sign in to see your points');
+      }
+      return;
+    }
+
+    final online = await Constants.checkNetwork();
+    if (!online) {
+      if (!silent) showToastMessage('No internet connection');
+      return;
+    }
+
+    userDataLoading.value = true;
+    try {
+      final res = await apiClient.getuserdata(Constants.userModel!.id??"0");
+      if (res.message != 'success') {
+        if (!silent) {
+          showToastMessage(res.message ?? 'Could not refresh points');
+        }
+        return;
+      }
+      final user = res.user;
+      if (user != null) {
+        Constants.userModel = user;
+        currentUser.value = user;
+      }
+    } catch (_) {
+      if (!silent) {
+        showToastMessage('Could not refresh points');
+      }
+    } finally {
+      userDataLoading.value = false;
+    }
   }
 
   /// Check/request location permission, get user position, and select nearest shop.

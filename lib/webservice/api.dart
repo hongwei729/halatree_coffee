@@ -35,6 +35,12 @@ abstract class Api {
   );
 
   @FormUrlEncoded()
+  @POST("getuserdata")
+  Future<GeneralResponse> getuserdata(
+    @Field("id") String userId
+  );
+
+  @FormUrlEncoded()
   @POST("requesthalatreeforgotpassword")
   Future<GeneralResponse> requesthalatreeforgotpassword(
     @Field("email") String email,

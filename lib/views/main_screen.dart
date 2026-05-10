@@ -15,11 +15,12 @@ class MainScreen extends GetView<MainController> {
       backgroundColor: colorBackground,
       body: SafeArea(
         child: _AnimatedLogoLayout(
+          mainController: controller,
           onLoyaltyProgramPressed: () => controller.openLoyaltyProgram(),
           child: Column(
             children: [
-              // Placeholder for logo + Pickup label + Loyalty button
-              const SizedBox(height: 16 + 120 + 8 + 24 + 8 + 40),
+              // Placeholder: sync with _AnimatedLogoLayoutState (_topPadding + rest offset + circle + gap + label)
+              const SizedBox(height: 16 + 14 + 148 + 15 + 28),
               // 3 action buttons
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -27,7 +28,7 @@ class MainScreen extends GetView<MainController> {
                   children: [
                     Expanded(
                       child: _ActionButton(
-                        label: 'Waikiki',
+                        label: 'Halatree',
                         onPressed: () {
                           controller.openWaikiki();
                         },
@@ -36,19 +37,35 @@ class MainScreen extends GetView<MainController> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _ActionButton(
-                        label: 'Kaaawa',
+                        label: 'Clover',
                         onPressed: () => _showKaaawaHoursDialog(context, controller),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Shop Online',
-                        onPressed: () {
-                          controller.openShopOnline();
-                        },
-                      ),
-                    ),
+
+                    // Expanded(
+                    //   child: _ActionButton(
+                    //     label: 'Waikiki',
+                    //     onPressed: () {
+                    //       controller.openWaikiki();
+                    //     },
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: _ActionButton(
+                    //     label: 'Kaaawa',
+                    //     onPressed: () => _showKaaawaHoursDialog(context, controller),
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 12),
+                    // Expanded(
+                    //   child: _ActionButton(
+                    //     label: 'Shop Online',
+                    //     onPressed: () {
+                    //       controller.openShopOnline();
+                    //     },
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -86,13 +103,15 @@ class MainScreen extends GetView<MainController> {
   }
 }
 
-/// Layout that shows the logo animating from center (splash position) to top.
+/// Layout that shows the points circle animating from center (splash position) to top.
 class _AnimatedLogoLayout extends StatefulWidget {
   final Widget child;
+  final MainController mainController;
   final VoidCallback? onLoyaltyProgramPressed;
 
   const _AnimatedLogoLayout({
     required this.child,
+    required this.mainController,
     this.onLoyaltyProgramPressed,
   });
 
@@ -102,9 +121,11 @@ class _AnimatedLogoLayout extends StatefulWidget {
 
 class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
     with SingleTickerProviderStateMixin {
-  static const double _logoStartSize = 140.0;
-  static const double _logoEndSize = 120.0;
+  static const double _logoStartSize = 168.0;
+  static const double _logoEndSize = 148.0;
   static const double _topPadding = 16.0;
+  /// Extra downward shift for the circle’s resting position (below [_topPadding]).
+  static const double _circleRestOffsetY = 14.0;
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -135,7 +156,7 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
     final padding = MediaQuery.paddingOf(context);
     final safeHeight = size.height - padding.top - padding.bottom;
     final centerY = (safeHeight / 2) - (_logoStartSize / 2);
-    final endY = _topPadding;
+    final endY = _topPadding + _circleRestOffsetY;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -152,54 +173,49 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
           builder: (context, _) {
             final t = _animation.value;
             final top = centerY + (endY - centerY) * t;
-            final logoSize = _logoStartSize + (_logoEndSize - _logoStartSize) * t;
+            final circleSize =
+                _logoStartSize + (_logoEndSize - _logoStartSize) * t;
             return Positioned(
               left: 0,
               right: 0,
               top: top,
               child: Center(
-                child: SizedBox(
-                  width: logoSize,
-                  height: logoSize,
-                  child: Image.asset(
-                    'assets/logo.png',
-                    fit: BoxFit.contain,
-                  ),
+                child: _PointsCircleBadge(
+                  diameter: circleSize,
+                  controller: widget.mainController,
                 ),
               ),
             );
           },
         ),
         // Loyalty Program button directly under the logo
-        AnimatedBuilder(
-          animation: _animation,
-          builder: (context, _) {
-            final t = _animation.value;
-            const buttonHeight = 48.0;
-            const gap = 8.0;
-            final top = _topPadding + _logoEndSize + gap;
-            return Positioned(
-              left: 24,
-              right: 24,
-              top: top,
-              child: Opacity(
-                opacity: t.clamp(0.0, 1.0),
-                child: _ActionButton(
-                  label: 'Loyalty Program',
-                  onPressed: widget.onLoyaltyProgramPressed ?? () {},
-                ),
-              ),
-            );
-          },
-        ),
+        // AnimatedBuilder(
+        //   animation: _animation,
+        //   builder: (context, _) {
+        //     final t = _animation.value;
+        //     const gap = 8.0;
+        //     final top = _topPadding + _logoEndSize + gap;
+        //     return Positioned(
+        //       left: 24,
+        //       right: 24,
+        //       top: top,
+        //       child: Opacity(
+        //         opacity: t.clamp(0.0, 1.0),
+        //         child: _ActionButton(
+        //           label: 'Loyalty Program',
+        //           onPressed: widget.onLoyaltyProgramPressed ?? () {},
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // ),
         // "Pickup" label below the Loyalty Program button
         AnimatedBuilder(
           animation: _animation,
           builder: (context, _) {
             final t = _animation.value;
-            const buttonHeight = 48.0;
-            const gap = 8.0;
-            final top = _topPadding + _logoEndSize + gap + buttonHeight + gap;
+            const gap = 15.0;
+            final top = _topPadding + _circleRestOffsetY + _logoEndSize + gap;
             return Positioned(
               left: 0,
               right: 0,
@@ -207,7 +223,7 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
               child: Opacity(
                 opacity: t.clamp(0.0, 1.0),
                 child: Text(
-                  'Pickup',
+                  'Redeem for',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.roboto(
                     fontSize: 18,
@@ -220,6 +236,125 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
           },
         ),
       ],
+    );
+  }
+}
+
+/// Loyalty points ring with a refresh control at the bottom-right.
+class _PointsCircleBadge extends StatelessWidget {
+  final double diameter;
+  final MainController controller;
+
+  const _PointsCircleBadge({
+    required this.diameter,
+    required this.controller,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final labelSize = (diameter * 0.09).clamp(10.0, 18.0);
+    final valueSize = (diameter * 0.20).clamp(20.0, 35.0);
+
+    return SizedBox(
+      width: diameter,
+      height: diameter,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: diameter,
+            height: diameter,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colorSurface,
+              border: Border.all(
+                color: colorPrimaryDark,
+                width: 3,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colorPrimaryDark.withValues(alpha: 0.18),
+                  blurRadius: 14,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Obx(() {
+                final points = controller.currentUser.value?.total_points;
+                final display = (points != null && points.isNotEmpty)
+                    ? points
+                    : '—';
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Current Points',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.roboto(
+                        fontSize: labelSize,
+                        fontWeight: FontWeight.w500,
+                        color: colorOnSurface.withValues(alpha: 0.88),
+                      ),
+                    ),
+                    SizedBox(height: diameter * 0.035),
+                    Text(
+                      display,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.roboto(
+                        fontSize: valueSize,
+                        fontWeight: FontWeight.w700,
+                        color: colorOnBackground,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ),
+          Positioned(
+            right: -2,
+            bottom: 0,
+            child: Obx(() {
+              final loading = controller.userDataLoading.value;
+              return Material(
+                color: colorSurface,
+                shape: CircleBorder(
+                  side: BorderSide(color: colorOutline, width: 1.5),
+                ),
+                elevation: 3,
+                shadowColor: Colors.black26,
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap:
+                      loading ? null : () => controller.refreshUserData(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: loading
+                        ? SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.2,
+                              color: colorPrimaryDark,
+                            ),
+                          )
+                        : Icon(
+                            Icons.refresh_rounded,
+                            size: 22,
+                            color: colorPrimaryDark,
+                          ),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
     );
   }
 }
