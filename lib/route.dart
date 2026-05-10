@@ -1,11 +1,14 @@
+import 'package:coffee/controllers/edit_profile_controller.dart';
 import 'package:coffee/controllers/forgot_password_controller.dart';
 import 'package:coffee/controllers/login_controller.dart';
 import 'package:coffee/controllers/main_controller.dart';
+import 'package:coffee/controllers/profile_controller.dart';
 import 'package:coffee/controllers/signup_controller.dart';
 import 'package:coffee/controllers/splash_controller.dart';
 import 'package:coffee/views/forgot_password_screen.dart';
 import 'package:coffee/views/login_screen.dart';
 import 'package:coffee/views/main_screen.dart';
+import 'package:coffee/views/edit_profile_screen.dart';
 import 'package:coffee/views/profile_screen.dart';
 import 'package:coffee/views/redeem_history_screen.dart';
 import 'package:coffee/views/signup_screen.dart';
@@ -20,6 +23,7 @@ class RouteName {
   static const String signupView = "/signupView";
   static const String forgotPasswordView = "/forgotPasswordView";
   static const String profileView = "/profileView";
+  static const String profileEditView = "/profileEditView";
   static const String redeemHistoryView = "/redeemHistoryView";
 }
 
@@ -40,7 +44,16 @@ abstract class Routes {
         })),
     GetPage(
         name: RouteName.profileView,
-        page: () => const ProfileScreen()),
+        page: () => const ProfileScreen(),
+        binding: BindingsBuilder(() {
+          Get.put(ProfileController());
+        })),
+    GetPage(
+        name: RouteName.profileEditView,
+        page: () => const EditProfileScreen(),
+        binding: BindingsBuilder(() {
+          Get.put(EditProfileController());
+        })),
     GetPage(
         name: RouteName.redeemHistoryView,
         page: () => const RedeemHistoryScreen()),
