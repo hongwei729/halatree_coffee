@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -354,6 +354,230 @@ class MainController extends GetxController {
 
   void openLoyaltyProgram() {
     openUrl("https://start.mylty.co/login?id=18240"); // TODO: replace with loyalty program URL
+  }
+
+  /// type `0`: Hala Tree (halatree) — [addcustomercredit]. type `1`: Clover — [deductcloverpoints].
+  void enterPointAmountDialog(int type) {
+    final user = Constants.userModel;
+    if (user?.id == null || user!.id!.isEmpty) {
+      showToastMessage('Sign in required');
+      return;
+    }
+
+    final textController = TextEditingController();
+    var submitting = false;
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Enter Point Amount'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text('Enter the amount of points you want to redeem'),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: textController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    hintText: 'Points',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: submitting ? null : () => Get.back(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: submitting
+                    ? null
+                    : () async {
+                        final raw = textController.text.trim();
+                        final amount = int.tryParse(raw);
+                        if (amount == null || amount <= 0) {
+                          showToastMessage('Enter a valid point amount');
+                          return;
+                        }
+                        final current = _parseUserPoints(user.total_points);
+                        if (amount > current) {
+                          showToastMessage(
+                            'Enter an amount that does not exceed your current points ($current).',
+                          );
+                          return;
+                        }
+
+                        final online = await Constants.checkNetwork();
+                        if (!online) {
+                          showToastMessage('No internet connection');
+                          return;
+                        }
+
+                        if (type == 1) {
+                          final code = _generateCloverRedeemCode(user.id!);
+                          Get.back();
+                          _showCloverRedeemCodeDialog(raw, code);
+                          return;
+                        }
+
+                        setDialogState(() => submitting = true);
+                        var dialogClosed = false;
+                        try {
+                          final res = await apiClient.addcustomercredit(
+                            user.id!,
+                            raw,
+                          );
+                          if (res.message == 'success') {
+                            final na = res.new_amount;
+                            if (na != null && na.isNotEmpty) {
+                              _applyTotalPoints(na);
+                            } else {
+                              await refreshUserData(silent: true);
+                            }
+                            dialogClosed = true;
+                            Get.back();
+                          } else {
+                            showToastMessage(res.message ?? 'Redeem failed');
+                          }
+                        } catch (_) {
+                          showToastMessage('Redeem failed. Please try again.');
+                        } finally {
+                          // Do not rebuild after Get.back(): setDialogState during pop
+                          // trips ChangeNotifier / transition asserts (e.g. line ~381 TextField).
+                          if (!dialogClosed && context.mounted) {
+                            setDialogState(() => submitting = false);
+                          }
+                        }
+                      },
+                child: submitting
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Redeem'),
+              ),
+            ],
+          );
+        },
+      ),
+    ).whenComplete(() {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        textController.dispose();
+      });
+    });
+  }
+
+  int _parseUserPoints(String? s) => int.tryParse(s ?? '') ?? 0;
+
+  void _applyTotalPoints(String newAmount) {
+    final m = Constants.userModel;
+    if (m == null) return;
+    m.total_points = newAmount;
+    Constants.userModel = m;
+    currentUser.value = m;
+    currentUser.refresh();
+  }
+
+  /// Six-digit suffix seeded from user id and current time.
+  String _generateCloverRedeemCode(String userId) {
+    final ts = DateTime.now().millisecondsSinceEpoch;
+    final rnd = math.Random(ts ^ userId.hashCode);
+    final six = rnd.nextInt(1000000).toString().padLeft(6, '0');
+    return 'HALATREE-$six';
+  }
+
+  void _showCloverRedeemCodeDialog(String pointsStr, String redeemCode) {
+    var loading = true;
+    String? apiError;
+    var deductionStarted = false;
+
+    Get.dialog(
+      StatefulBuilder(
+        builder: (context, setDialogState) {
+          if (!deductionStarted) {
+            deductionStarted = true;
+            Future<void> deduct() async {
+              final online = await Constants.checkNetwork();
+              if (!online) {
+                apiError = 'No internet connection';
+                loading = false;
+                if (context.mounted) setDialogState(() {});
+                return;
+              }
+              try {
+                final u = Constants.userModel;
+                final res = await apiClient.deductcloverpoints(
+                  u?.id ?? '0',
+                  pointsStr,
+                  redeemCode,
+                );
+                if (res.message == 'success') {
+                  final na = res.new_amount;
+                  if (na != null && na.isNotEmpty) {
+                    _applyTotalPoints(na);
+                  } else {
+                    await refreshUserData(silent: true);
+                  }
+                } else {
+                  apiError = res.message ?? 'Could not redeem points';
+                }
+              } catch (_) {
+                apiError = 'Could not redeem points';
+              } finally {
+                loading = false;
+                if (context.mounted) setDialogState(() {});
+              }
+            }
+
+            deduct();
+          }
+
+          return AlertDialog(
+            title: const Text('Redeem code'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SelectableText(
+                  redeemCode,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (loading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: CircularProgressIndicator(),
+                    ),
+                  ),
+                if (!loading && apiError != null)
+                  Text(
+                    apiError!,
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                if (!loading && apiError == null)
+                  const Text('Your points have been updated.'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: loading ? null : () => Get.back(),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
 }

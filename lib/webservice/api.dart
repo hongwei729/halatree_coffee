@@ -54,4 +54,19 @@ abstract class Api {
     @Field("password") String newPassword,
   );
 
+  @FormUrlEncoded()
+  @POST("addcustomercredit")
+  Future<GeneralResponse> addcustomercredit(
+    @Field("customer_id") String customer_id,
+    @Field("amount") String amount,
+  );
+
+  @FormUrlEncoded()
+  @POST("deductcloverpoints")
+  Future<GeneralResponse> deductcloverpoints(
+    @Field("id") String userId,
+    @Field("points") String points,
+    @Field("redeem_code") String redeemCode,
+  );
+
 }

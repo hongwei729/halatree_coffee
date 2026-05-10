@@ -30,7 +30,7 @@ class MainScreen extends GetView<MainController> {
                       child: _ActionButton(
                         label: 'Halatree',
                         onPressed: () {
-                          controller.openWaikiki();
+                          controller.enterPointAmountDialog(0);
                         },
                       ),
                     ),
@@ -38,7 +38,9 @@ class MainScreen extends GetView<MainController> {
                     Expanded(
                       child: _ActionButton(
                         label: 'Clover',
-                        onPressed: () => _showKaaawaHoursDialog(context, controller),
+                        onPressed: (){
+                          controller.enterPointAmountDialog(1);
+                        },
                       ),
                     ),
 

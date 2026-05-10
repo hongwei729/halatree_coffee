@@ -16,7 +16,8 @@ GeneralResponse _$GeneralResponseFromJson(Map<String, dynamic> json) =>
       ..user = json['user'] == null
           ? null
           : UserModel.fromJson(json['user'] as Map<String, dynamic>)
-      ..verification_code = json['verification_code'] as String?;
+      ..verification_code = json['verification_code'] as String?
+      ..new_amount = nullableStringFromDynamic(json['new_amount']);
 
 Map<String, dynamic> _$GeneralResponseToJson(GeneralResponse instance) =>
     <String, dynamic>{
@@ -25,4 +26,5 @@ Map<String, dynamic> _$GeneralResponseToJson(GeneralResponse instance) =>
       'newsData': instance.newsData,
       'user': instance.user,
       'verification_code': instance.verification_code,
+      'new_amount': instance.new_amount,
     };

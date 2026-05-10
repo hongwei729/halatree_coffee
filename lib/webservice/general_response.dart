@@ -11,6 +11,12 @@ int? nullableStatusFromJson(Object? value) {
   return null;
 }
 
+String? nullableStringFromDynamic(Object? value) {
+  if (value == null) return null;
+  if (value is String) return value;
+  return value.toString();
+}
+
 @JsonSerializable()
 class GeneralResponse {
   String? message;
@@ -21,6 +27,8 @@ class GeneralResponse {
   NewsModel? newsData;
   UserModel? user;
   String? verification_code;
+  @JsonKey(name: 'new_amount', fromJson: nullableStringFromDynamic)
+  String? new_amount;
 
   GeneralResponse();
 
