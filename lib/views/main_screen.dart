@@ -207,9 +207,9 @@ class _AnimatedLogoLayoutState extends State<_AnimatedLogoLayout>
           right: 4,
           child: IconButton(
             key: _menuButtonKey,
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.account_circle_outlined),
             color: colorOnBackground,
-            tooltip: 'Menu',
+            tooltip: 'Account',
             onPressed: _openMainMenu,
           ),
         ),
